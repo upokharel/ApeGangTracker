@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ape Gang Tracker</title>
+    <style>
+        /* General styling */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            background-color: #121212;
+            background-image: url('https://lw-cdn.com/images/9FAFC78AF228/k_e23cb42c4f71c22fe71d2d1af247e432;w_1600;h_1600;q_100/10019569.jpg'); /* Neon bananas background */
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        header h1 {
+            font-size: 2.5rem;
+            color: #FFD700; /* Gold color for title */
+        }
+        main {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #FFD700;
+            border-radius: 10px;
+            overflow: hidden;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .card img {
+            max-width: 100%;
+            height: auto;
+        }
+        .card h2 {
+            margin: 10px 0;
+            font-size: 1.2rem;
+            color: #FFD700;
+        }
+        .card p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            color: #121212;
+            background: #FFD700;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        .btn:hover {
+            background: #e6b800;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ape Gang Tracker</h1>
+        <p>Track the rarest Ape Gang NFTs currently on sale!</p>
+    </header>
+    <main id="ape-container">
+        <!-- NFT cards will be dynamically added here -->
+    </main>
+
+    <script>
+        const apiKey = "bea2a8f6-9338-5a65-83cb-6a2158116905";
+        const collectionSlug = "0xf36f4fadef899e839461eccb8d0ce3d49cff5a90";
+        const apiUrl = \`https://api.reservoir.tools/tokens/v5?collection=\${collectionSlug}&sortBy=price\`;
+
+        // Function to fetch NFTs on sale
+        async function fetchNFTsOnSale() {
+            const response = await fetch(apiUrl, {
+                headers: { "x-api-key": apiKey },
+            });
+            const data = await response.json();
+            return data.tokens || [];
+        }
+
+        // Function to render NFTs on sale
+        async function renderNFTsOnSale() {
+            const container = document.getElementById("ape-container");
+            const nfts = await fetchNFTsOnSale();
+
+            if (nfts.length === 0) {
+                container.innerHTML = `<p style="text-align: center; font-size: 1.5rem;">No Ape Gang NFTs currently on sale.</p>`;
+                return;
+            }
+
+            nfts.forEach((nft) => {
+                const { token, market } = nft;
+                if (market && market.floorAsk) {
+                    const card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
+                        <img src="\${token.image}" alt="Ape Image">
+                        <h2>#\${token.tokenId}</h2>
+                        <p>Rarity Score: \${token.rarityScore.toFixed(2)}</p>
+                        <p>Price: \${market.floorAsk.price.amount.native} SOL</p>
+                        <a class="btn" href="https://magiceden.io/item-details/\${token.contract}:\${token.tokenId}" target="_blank">View on Magic Eden</a>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+        }
+
+        // Initialize
+        renderNFTsOnSale();
+    </script>
+</body>
+</html>
